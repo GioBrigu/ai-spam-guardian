@@ -35,3 +35,35 @@ def leggi_posta_indesiderata(access_token: str, numero_massimo: int = 25) -> lis
 
     dati = risposta.json()
     return dati["value"]  # Graph incapsula sempre i risultati dentro "value"
+
+
+def ottieni_o_crea_cartella(access_token: str, nome_cartella: str) -> str:
+    '''Restituisce l'id della cartella con questo nome; la crea se non esiste ancora.'''
+    headers = {'Authorization': f'Bearer {access_token}'}
+    url = f'{GRAPH_BASE_URL}/me/mailFolders'
+
+    risposta = requests.get(url, headers=headers, params={'$filter': f"displayName eq '{nome_cartella}'"})
+    if risposta.status_code != 200:
+        raise RuntimeError(f'Errore Graph API: {risposta.status_code} - {risposta.text}')
+
+    cartelle_trovate = risposta.json()['value']
+    if cartelle_trovate:
+        return cartelle_trovate[0]['id']
+
+    risposta_creazione = requests.post(url, headers=headers, json={'displayName': nome_cartella})
+    if risposta_creazione.status_code != 201:
+        raise RuntimeError(
+            f'Errore creazione cartella: {risposta_creazione.status_code} - {risposta_creazione.text}'
+        )
+
+    return risposta_creazione.json()['id']
+
+
+def sposta_email(access_token: str, email_id: str, cartella_destinazione_id: str) -> None:
+    '''Sposta un'email nella cartella indicata.'''
+    headers = {'Authorization': f'Bearer {access_token}'}
+    url = f'{GRAPH_BASE_URL}/me/messages/{email_id}/move'
+
+    risposta = requests.post(url, headers=headers, json={'destinationId': cartella_destinazione_id})
+    if risposta.status_code != 201:
+        raise RuntimeError(f'Errore spostamento email: {risposta.status_code} - {risposta.text}')

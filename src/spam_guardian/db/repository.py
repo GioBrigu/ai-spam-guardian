@@ -35,3 +35,12 @@ def email_gia_classificata(connessione: sqlite3.Connection, email_id: str) -> bo
     '''Controlla se un'email è già stata classificata in precedenza.'''
     cursore = connessione.execute('SELECT 1 FROM emails WHERE id = ?', (email_id,))
     return cursore.fetchone() is not None
+
+
+def registra_azione(connessione: sqlite3.Connection, email_id: str, azione: str, esito: str) -> None:
+    '''Registra nel log un'azione automatica eseguita su un'email.'''
+    connessione.execute('''
+        INSERT INTO azioni_log (email_id, azione, esito, data_azione)
+        VALUES (?, ?, ?, ?)
+    ''', (email_id, azione, esito, datetime.now(timezone.utc).isoformat()))
+    connessione.commit()
