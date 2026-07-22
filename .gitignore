@@ -12,3 +12,7 @@ token_cache.bin
 
 # OS
 .DS_Store
+
+# Dati email (contengono informazioni personali) — MAI su Git
+confronto_modelli.csv
+confronto_per_email.csv
