@@ -39,7 +39,7 @@ def esegui_pipeline(numero_massimo: int = 20) -> None:
         repository.salva_classificazione(connessione, email, risultato)
 
         try:
-            azione = azioni.esegui_azione(token, email, risultato['categoria'], cartella_verifica_id)
+            azione = azioni.esegui_azione(token, email, risultato['categoria'], risultato['confidenza'], cartella_verifica_id)
             esito = 'successo'
         except RuntimeError as errore:
             azione = 'nessuna_azione'

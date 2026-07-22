@@ -67,3 +67,13 @@ def sposta_email(access_token: str, email_id: str, cartella_destinazione_id: str
     risposta = requests.post(url, headers=headers, json={'destinationId': cartella_destinazione_id})
     if risposta.status_code != 201:
         raise RuntimeError(f'Errore spostamento email: {risposta.status_code} - {risposta.text}')
+
+
+def elimina_email(access_token: str, email_id: str) -> None:
+    '''Elimina un'email (viene spostata in "Posta eliminata", recuperabile per un periodo)'''
+    headers = {'Authorization': f'Bearer {access_token}'}
+    url = f'{GRAPH_BASE_URL}/me/messages/{email_id}'
+
+    risposta = requests.delete(url, headers=headers)
+    if risposta.status_code != 204:
+        raise RuntimeError(f'Errore eliminazione email: {risposta.status_code} - {risposta.text}')
