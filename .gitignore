@@ -1,0 +1,14 @@
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+
+# Configurazione e segreti — MAI su Git
+.env
+token_cache.bin
+
+# Editor
+.vscode/
+
+# OS
+.DS_Store

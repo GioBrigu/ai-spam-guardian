@@ -1,0 +1,13 @@
+"""
+Caricamento della configurazione da variabili d'ambiente.
+"""
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # legge il file .env e lo carica in os.environ
+
+CLIENT_ID = os.environ["AZURE_CLIENT_ID"]
+AUTHORITY = "https://login.microsoftonline.com/consumers"
+SCOPES = ["Mail.ReadWrite"]
+CACHE_PATH = "token_cache.bin"
