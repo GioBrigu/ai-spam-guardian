@@ -5,10 +5,12 @@ description = "App desktop AI-powered per gestire la Posta Indesiderata di Outlo
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "apscheduler>=3.11.3",
     "dotenv>=0.9.9",
     "msal>=1.37.0",
     "msal-extensions>=1.3.1",
     "pandas>=3.0.3",
+    "pyside6>=6.11.1",
     "python-dotenv>=1.2.2",
     "requests>=2.34.2",
 ]

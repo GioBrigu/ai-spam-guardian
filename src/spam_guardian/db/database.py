@@ -37,4 +37,14 @@ def crea_schema(connessione: sqlite3.Connection) -> None:
             FOREIGN KEY (email_id) REFERENCES emails (id)
         )
     ''')
+    connessione.execute('''
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email_id TEXT NOT NULL,
+            categoria_originale TEXT NOT NULL,
+            categoria_corretta TEXT NOT NULL,
+            data_correzione TEXT NOT NULL,
+            FOREIGN KEY (email_id) REFERENCES emails (id)
+        )
+    ''')
     connessione.commit()

@@ -44,3 +44,19 @@ def registra_azione(connessione: sqlite3.Connection, email_id: str, azione: str,
         VALUES (?, ?, ?, ?)
     ''', (email_id, azione, esito, datetime.now(timezone.utc).isoformat()))
     connessione.commit()
+
+
+def leggi_email_classificate(connessione: sqlite3.Connection) -> list[dict]:
+    '''Restituisce tutte le email classificate: id, oggetto e categoria assegnata.'''
+    cursore = connessione.execute('SELECT id, oggetto, categoria FROM emails ORDER BY data_classificazione DESC')
+    colonne = [descrizione[0] for descrizione in cursore.description]
+    return [dict(zip(colonne, riga)) for riga in cursore.fetchall()]
+
+
+def salva_feedback(connessione: sqlite3.Connection, email_id: str, categoria_originale: str, categoria_corretta: str) -> None:
+    '''Salva una correzione manuale della categoria di un'email.'''
+    connessione.execute('''
+        INSERT INTO feedback (email_id, categoria_originale, categoria_corretta, data_correzione)
+        VALUES (?, ?, ?, ?)
+    ''', (email_id, categoria_originale, categoria_corretta, datetime.now(timezone.utc).isoformat()))
+    connessione.commit()
