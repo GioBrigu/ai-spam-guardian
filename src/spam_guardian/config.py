@@ -13,3 +13,4 @@ SCOPES = ["Mail.ReadWrite"]
 CACHE_PATH = "token_cache.bin"
 OLLAMA_URL = 'http://localhost:11434/api/generate'
 MODELLO_CLASSIFICAZIONE = 'granite4.1:3b'
+DB_PATH = 'spam_guardian.db'
