@@ -39,6 +39,12 @@ Analizza l'email seguente e rispondi SOLO con un oggetto JSON con questi campi:
 - "confidenza": numero da 0 a 1
 - "motivazione": massimo una frase, in italiano
 
+Attenzione a non confondere "phishing" con "commerciale": se l'email promette premi,
+vincite, bonus, giri gratis o denaro non richiesto, spingendo a cliccare con urgenza
+per riscuoterlo, è "phishing" anche se il tono sembra pubblicitario — è un classico
+schema di truffa, non un'offerta commerciale legittima. Usa "commerciale" solo per
+pubblicità reale di prodotti o servizi, senza la logica "hai vinto qualcosa, agisci ora".
+
 Mittente: {mittente}
 Oggetto: {oggetto}
 Anteprima corpo: {corpo}

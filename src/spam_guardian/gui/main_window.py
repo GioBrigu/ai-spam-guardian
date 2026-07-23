@@ -1,7 +1,7 @@
 """
 Finestra principale: mostra le email classificate, permette di correggere
-la categoria assegnata dal modello, e controlla l'avvio/stop dello
-scheduler che esegue la pipeline in automatico.
+la categoria assegnata dal modello, controlla l'avvio/stop dello scheduler
+e vive nella system tray per restare in background.
 """
 
 import sys
@@ -10,8 +10,9 @@ from functools import partial
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QTableWidget, QTableWidgetItem, QComboBox,
-    QPushButton, QLabel,
+    QPushButton, QLabel, QSystemTrayIcon, QMenu, QStyle,
 )
+from PySide6.QtGui import QAction
 
 from ..core.scheduler import crea_scheduler
 from ..db import database, repository
@@ -41,6 +42,8 @@ class FinestraPrincipale(QWidget):
 
         layout.addLayout(self._crea_sezione_log())
         self._aggiorna_log()
+
+        self._crea_tray_icon()
 
     def _crea_controlli_scheduler(self) -> QHBoxLayout:
         '''Riga con etichetta di stato e pulsanti avvia/ferma scheduler.'''
@@ -77,11 +80,48 @@ class FinestraPrincipale(QWidget):
         self.pulsante_avvia.setEnabled(True)
         self.pulsante_ferma.setEnabled(False)
 
-    def closeEvent(self, event) -> None:
-        '''Se lo scheduler è attivo, lo ferma prima di chiudere la finestra.'''
+    def _crea_tray_icon(self) -> None:
+        '''Crea l'icona nella system tray, con menu "Mostra finestra" / "Esci".'''
+        icona = self.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
+
+        self.tray_icon = QSystemTrayIcon(icona, self)
+        self.tray_icon.setToolTip('AI Spam Guardian')
+
+        menu = QMenu()
+
+        azione_mostra = QAction('Mostra finestra', self)
+        azione_mostra.triggered.connect(self._mostra_finestra)
+        menu.addAction(azione_mostra)
+
+        azione_esci = QAction('Esci', self)
+        azione_esci.triggered.connect(self._esci)
+        menu.addAction(azione_esci)
+
+        self.tray_icon.setContextMenu(menu)
+        self.tray_icon.activated.connect(self._tray_attivata)
+        self.tray_icon.show()
+
+    def _mostra_finestra(self) -> None:
+        '''Riporta in primo piano la finestra principale.'''
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+    def _tray_attivata(self, motivo) -> None:
+        '''Doppio clic sull'icona tray: mostra la finestra.'''
+        if motivo == QSystemTrayIcon.ActivationReason.DoubleClick:
+            self._mostra_finestra()
+
+    def _esci(self) -> None:
+        '''Chiude davvero l'app (ferma lo scheduler, se attivo, prima di uscire).'''
         if self.scheduler is not None:
             self.scheduler.shutdown()
-        event.accept()
+        QApplication.quit()
+
+    def closeEvent(self, event) -> None:
+        '''Clic sulla X: nasconde la finestra nella tray invece di chiudere l'app.'''
+        event.ignore()
+        self.hide()
 
     def _crea_sezione_log(self) -> QVBoxLayout:
         '''Etichetta, pulsante "Aggiorna" e tabella del log delle esecuzioni.'''
@@ -137,6 +177,7 @@ class FinestraPrincipale(QWidget):
 
 def avvia_finestra() -> None:
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
     finestra = FinestraPrincipale()
     finestra.show()
     sys.exit(app.exec())
