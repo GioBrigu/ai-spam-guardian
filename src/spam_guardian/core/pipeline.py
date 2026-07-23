@@ -23,6 +23,9 @@ def esegui_pipeline(numero_massimo: int = 20) -> None:
     email_spam = graph_client.leggi_posta_indesiderata(token, numero_massimo=numero_massimo)
     print(f'Recuperate {len(email_spam)} email.\n')
 
+    email_nuove = 0
+    errori = 0
+
     for email in email_spam:
         if repository.email_gia_classificata(connessione, email['id']):
             print(f'Oggetto: {email["subject"]} (già classificata, salto)\n')
@@ -34,9 +37,11 @@ def esegui_pipeline(numero_massimo: int = 20) -> None:
             risultato = classifier.classifica_email(email)
         except RuntimeError as errore:
             print(f'  Errore nella classificazione: {errore}\n')
+            errori += 1
             continue
 
         repository.salva_classificazione(connessione, email, risultato)
+        email_nuove += 1
 
         try:
             azione = azioni.esegui_azione(token, email, risultato['categoria'], risultato['confidenza'], cartella_verifica_id)
@@ -51,4 +56,5 @@ def esegui_pipeline(numero_massimo: int = 20) -> None:
         print(f'  Confidenza: {risultato["confidenza"]}')
         print(f'  Azione: {azione}\n')
 
+    repository.registra_esecuzione(connessione, len(email_spam), email_nuove, errori)
     connessione.close()

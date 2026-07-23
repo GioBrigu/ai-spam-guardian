@@ -60,3 +60,24 @@ def salva_feedback(connessione: sqlite3.Connection, email_id: str, categoria_ori
         VALUES (?, ?, ?, ?)
     ''', (email_id, categoria_originale, categoria_corretta, datetime.now(timezone.utc).isoformat()))
     connessione.commit()
+
+
+def registra_esecuzione(connessione: sqlite3.Connection, email_lette: int, email_nuove: int, errori: int) -> None:
+    '''Registra un riepilogo di una esecuzione della pipeline.'''
+    connessione.execute('''
+        INSERT INTO esecuzioni_log (data_esecuzione, email_lette, email_nuove, errori)
+        VALUES (?, ?, ?, ?)
+    ''', (datetime.now(timezone.utc).isoformat(), email_lette, email_nuove, errori))
+    connessione.commit()
+
+
+def leggi_log_esecuzioni(connessione: sqlite3.Connection, limite: int = 20) -> list[dict]:
+    '''Restituisce le ultime esecuzioni della pipeline, più recenti prima.'''
+    cursore = connessione.execute('''
+        SELECT data_esecuzione, email_lette, email_nuove, errori
+        FROM esecuzioni_log
+        ORDER BY data_esecuzione DESC
+        LIMIT ?
+    ''', (limite,))
+    colonne = [descrizione[0] for descrizione in cursore.description]
+    return [dict(zip(colonne, riga)) for riga in cursore.fetchall()]
